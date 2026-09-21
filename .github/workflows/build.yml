@@ -223,7 +223,7 @@ jobs:
         - false
         - true
         os:
-        - ubuntu-24.04-riscv
+        - ubuntu-24.04-riscv  # A RISC-V machine!
         - ubuntu-26.04-arm
         exclude:
         # Do not test BOLT with free-threading, to conserve resources
