@@ -27,7 +27,7 @@ jobs:
         && ' (free-threading)'
         || ''
       }}
-    runs-on: ubuntu-26.04
+    runs-on: ${{ inputs.sanitizer == 'HWASan' && 'ubuntu-26.04-arm' || 'ubuntu-26.04' }}
     timeout-minutes: 60
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -85,6 +85,17 @@ jobs:
         } > Modules/Setup.local
       env:
         SAN_LOG_OPTION: log_path=${{ github.workspace }}/san_log
+    - name: HWASan option setup
+      if: inputs.sanitizer == 'HWASan'
+      run: >-
+        echo
+        "HWASAN_OPTIONS=${SAN_LOG_OPTION}
+        detect_leaks=0
+        allocator_may_return_null=1
+        handle_segv=0"
+        >> "$GITHUB_ENV"
+      env:
+        SAN_LOG_OPTION: log_path=${{ github.workspace }}/san_log
     - name: Add ccache to PATH
       run: |
         echo "PATH=/usr/lib/ccache:$PATH" >> "$GITHUB_ENV"
@@ -121,6 +132,8 @@ jobs:
           && '--with-thread-sanitizer'
           || inputs.sanitizer == 'MSan'
           && '--with-memory-sanitizer'
+          || inputs.sanitizer == 'HWASan'
+          && '--with-hwaddress-sanitizer'
           || '--with-undefined-behavior-sanitizer --with-strict-overflow'
         }}
         ${{ inputs.sanitizer == 'MSan' && '--with-assertions' || '--with-pydebug' }}

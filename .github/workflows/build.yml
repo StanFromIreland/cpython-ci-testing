@@ -550,6 +550,9 @@ jobs:
         - check-name: Memory
           sanitizer: MSan
           free-threading: false
+        - check-name: Hardware-assisted address
+          sanitizer: HWASan
+          free-threading: false
     uses: ./.github/workflows/reusable-san.yml
     with:
       sanitizer: ${{ matrix.sanitizer }}

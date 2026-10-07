@@ -693,11 +693,14 @@ def display_header(use_resources: dict[str, str | None],
 
     # This makes it easier to remember what to set in your local
     # environment when trying to reproduce a sanitizer failure.
-    asan = support.check_sanitizer(address=True)
+    hwasan = support.check_sanitizer(hwaddress=True)
+    asan = support.check_sanitizer(address=True) and not hwasan
     msan = support.check_sanitizer(memory=True)
     ubsan = support.check_sanitizer(ub=True)
     tsan = support.check_sanitizer(thread=True)
     sanitizers = []
+    if hwasan:
+        sanitizers.append("hardware-assisted address")
     if asan:
         sanitizers.append("address")
     if msan:
@@ -709,6 +712,7 @@ def display_header(use_resources: dict[str, str | None],
     if sanitizers:
         print(f"== sanitizers: {', '.join(sanitizers)}")
         for sanitizer, env_var in (
+            (hwasan, "HWASAN_OPTIONS"),
             (asan, "ASAN_OPTIONS"),
             (msan, "MSAN_OPTIONS"),
             (ubsan, "UBSAN_OPTIONS"),
